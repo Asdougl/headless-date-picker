@@ -1,11 +1,9 @@
 import classNames from 'classnames'
-import dayjs from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 import { FC, useState } from 'react'
 import {
   DatePicker,
-  HeaderComponent,
-  MONTH_OPTIONS,
-} from './components/DatePicker'
+} from './components/DatePickerV2'
 
 function mobileCheck() {
   const check = navigator.userAgent || navigator.vendor
@@ -19,76 +17,22 @@ function mobileCheck() {
   )
 }
 
-interface MyDatePickerProps {
-  value: string
-  onChange: (value: string) => void
-  min?: Date
-  max?: Date
-}
-
-const MyDatePicker: FC<MyDatePickerProps> = ({ value, onChange, min, max }) => {
-  return (
-    <DatePicker
-      value={value ? new Date(value) : undefined}
-      onChange={(date) => onChange(date.toISOString())}
-      classNameConfig={{
-        container: 'border border-blue-500 shadow-lg px-2 py-1 m-2 rounded-lg',
-        input: 'border border-blue-500 rounded-lg px-4 py-2',
-        grid: 'grid grid-cols-7',
-        buttons: ({ diffMonth, current, today }) =>
-          classNames('h-8 w-8 rounded-full disabled:opacity-10 border', {
-            'opacity-60': diffMonth,
-            'bg-blue-500 text-white border-blue-500': current,
-            'border-blue-500': today,
-            'border-transparent': !current && !today,
-          }),
-        dayLabel: 'text-red-500 text-center',
-      }}
-      header={({ month, setMonth, prev, next }) => {
-        return (
-          <div className="flex justify-between">
-            <button onClick={prev}>Prev</button>
-            <select
-              value={month.getMonth()}
-              onChange={(e) =>
-                setMonth(new Date(month.getFullYear(), +e.currentTarget.value))
-              }
-            >
-              {MONTH_OPTIONS}
-            </select>
-            <input
-              type="number"
-              min={1901}
-              max={dayjs().add(50, 'years').get('year')}
-              value={month.getFullYear()}
-              onChange={(e) =>
-                setMonth(new Date(+e.currentTarget.value, month.getMonth()))
-              }
-            />
-            <button onClick={next}>Next</button>
-          </div>
-        )
-      }}
-      format={(date) => dayjs(date).format('DD MMM YYYY')}
-      min={min}
-      max={max}
-      isMobile={mobileCheck()}
-    />
-  )
-}
-
 function App() {
-  const [date, setDate] = useState('')
+  const [date, setDate] = useState<Dayjs>()
 
   return (
     <div className="container mx-auto hello-world">
       <h1 className="text-4xl">Hello World</h1>
-      <MyDatePicker
+      <DatePicker
         value={date}
-        onChange={setDate}
-        max={dayjs().add(12, 'days').toDate()}
-        min={dayjs().subtract(2, 'days').toDate()}
+        onChange={date => setDate(date.startOf('day'))}
+        isMobile={mobileCheck()}
+        mondayStart
+        min={dayjs('2022-10-10')}
+        max={dayjs('2022-12-10')}
+        closeOnSelect
       />
+      <div>Ya picked: {date?.toISOString() || 'NOTHIN'}</div>
     </div>
   )
 }
